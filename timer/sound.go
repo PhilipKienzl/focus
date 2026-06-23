@@ -60,7 +60,7 @@ func prepSoundStream(sound string) (beep.StreamSeekCloser, error) {
 		return nil, err
 	}
 
-	defer f.Close()
+	//defer f.Close()
 
 	ext = filepath.Ext(sound)
 
