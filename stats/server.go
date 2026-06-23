@@ -166,5 +166,6 @@ func Server(dB store.DB, port uint) error {
 	// openbrowser("http://localhost:1111")
 
 	//nolint:gosec // no timeout is ok
-	return http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
+	//return http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
+	return http.ListenAndServe(fmt.Sprintf("127.0.0.1:%d", port), mux)
 }
