@@ -2,11 +2,9 @@ package app
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"os/exec"
 	"runtime"
-	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/pterm/pterm"
@@ -20,7 +18,6 @@ import (
 )
 
 const (
-	envUpdateNotifier = "FOCUS_UPDATE_NOTIFIER"
 	envNoColor        = "NO_COLOR"
 	envFocusNoColor   = "FOCUS_NO_COLOR"
 )
@@ -35,47 +32,6 @@ func firstNonEmptyString(ss ...string) string {
 	}
 
 	return ""
-}
-
-// checkForUpdates alerts the user if there is
-// an updated version of Focus from the one currently installed.
-func checkForUpdates(app *cli.App) {
-	spinner, _ := pterm.DefaultSpinner.Start("Checking for updates...")
-	c := http.Client{Timeout: 10 * time.Second}
-
-	resp, err := c.Get("https://github.com/ayoisaiah/focus/releases/latest")
-	if err != nil {
-		pterm.Error.Println("HTTP Error: Failed to check for update")
-		return
-	}
-
-	defer resp.Body.Close()
-
-	var version string
-
-	_, err = fmt.Sscanf(
-		resp.Request.URL.String(),
-		"https://github.com/ayoisaiah/focus/releases/tag/%s",
-		&version,
-	)
-	if err != nil {
-		pterm.Error.Println("Failed to get latest version")
-		return
-	}
-
-	if version == app.Version {
-		text := pterm.Sprintf(
-			"Congratulations, you are using the latest version of %s",
-			app.Name,
-		)
-		spinner.Success(text)
-	} else {
-		pterm.Warning.Prefix = pterm.Prefix{
-			Text:  "UPDATE AVAILABLE",
-			Style: pterm.NewStyle(pterm.BgYellow, pterm.FgBlack),
-		}
-		pterm.Warning.Printfln("A new release of focus is available: %s at %s", version, resp.Request.URL.String())
-	}
 }
 
 func sessionHelper(ctx *cli.Context) ([]*models.Session, store.DB, error) {
@@ -184,10 +140,6 @@ func beforeAction(ctx *cli.Context) error {
 			"https://github.com/ayoisaiah/focus/releases/%s\n",
 			c.App.Version,
 		)
-
-		if _, found := os.LookupEnv(envUpdateNotifier); found {
-			checkForUpdates(c.App)
-		}
 	}
 
 	pterm.Error.MessageStyle = pterm.NewStyle(pterm.FgRed)
